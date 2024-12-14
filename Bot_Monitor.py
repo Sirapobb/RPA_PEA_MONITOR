@@ -1,6 +1,8 @@
 import streamlit as st
 import gspread
 import pandas as pd
+from oauth2client.service_account import ServiceAccountCredentials
+import json
 
 # Set Streamlit page configuration
 st.set_page_config(
@@ -9,8 +11,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"  # Sidebar starts expanded
 )
 
-# Authenticate and connect to Google Sheets
-gc = gspread.service_account(filename="credentials.json")
+# Authenticate and connect to Google Sheets using Streamlit Secrets
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+credentials_dict = json.loads(st.secrets["GOOGLE_SHEETS_CREDENTIALS"])
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+gc = gspread.authorize(credentials)
+
+# Open the Google Sheet by key
 sh = gc.open_by_key('1T6tk1QDilil7QTLaTBiHq0yNLdQT3xQhqMQgZAlZCXs')  # Replace with your Google Sheet key
 worksheet = sh.worksheet("Notification")
 
@@ -19,7 +26,7 @@ data = worksheet.get_all_records()
 df = pd.DataFrame(data)
 
 # Display the DataFrame for verification
-#st.dataframe(df)
+# st.dataframe(df)
 
 # Display the latest notification
 if not df.empty:
