@@ -12,7 +12,18 @@ st.set_page_config(
 
 # ใช้ Secrets โดยตรงจาก Streamlit
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-credentials_dict = st.secrets["GOOGLE_SHEETS_CREDENTIALS"]  # ไม่ต้องใช้ json.loads
+credentials_dict = {
+    "type": st.secrets["GOOGLE_SHEETS"]["type"],
+    "project_id": st.secrets["GOOGLE_SHEETS"]["project_id"],
+    "private_key_id": st.secrets["GOOGLE_SHEETS"]["private_key_id"],
+    "private_key": st.secrets["GOOGLE_SHEETS"]["private_key"],
+    "client_email": st.secrets["GOOGLE_SHEETS"]["client_email"],
+    "client_id": st.secrets["GOOGLE_SHEETS"]["client_id"],
+    "auth_uri": st.secrets["GOOGLE_SHEETS"]["auth_uri"],
+    "token_uri": st.secrets["GOOGLE_SHEETS"]["token_uri"],
+    "auth_provider_x509_cert_url": st.secrets["GOOGLE_SHEETS"]["auth_provider_x509_cert_url"],
+    "client_x509_cert_url": st.secrets["GOOGLE_SHEETS"]["client_x509_cert_url"]
+}  # ไม่ต้องใช้ json.loads
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 gc = gspread.authorize(credentials)
 
