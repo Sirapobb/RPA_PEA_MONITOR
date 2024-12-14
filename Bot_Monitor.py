@@ -1,39 +1,34 @@
 import streamlit as st
 import gspread
-import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
-import json
+import pandas as pd
 
-# Set Streamlit page configuration
+# ตั้งค่า Streamlit Page
 st.set_page_config(
-    page_title="Notification Viewer",  # Title of the app
-    layout="wide",  # Use wide layout
-    initial_sidebar_state="expanded"  # Sidebar starts expanded
+    page_title="Notification Viewer",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# Authenticate and connect to Google Sheets using Streamlit Secrets
+# ใช้ Secrets โดยตรงจาก Streamlit
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-credentials_dict = json.loads(st.secrets["GOOGLE_SHEETS_CREDENTIALS"])
+credentials_dict = st.secrets["GOOGLE_SHEETS_CREDENTIALS"]  # ไม่ต้องใช้ json.loads
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 gc = gspread.authorize(credentials)
 
-# Open the Google Sheet by key
-sh = gc.open_by_key('1T6tk1QDilil7QTLaTBiHq0yNLdQT3xQhqMQgZAlZCXs')  # Replace with your Google Sheet key
+# เปิด Google Sheet ด้วย Key
+sh = gc.open_by_key('1T6tk1QDilil7QTLaTBiHq0yNLdQT3xQhqMQgZAlZCXs')
 worksheet = sh.worksheet("Notification")
 
-# Fetch data from Google Sheets
+# ดึงข้อมูลจาก Google Sheets
 data = worksheet.get_all_records()
 df = pd.DataFrame(data)
 
-# Display the DataFrame for verification
-# st.dataframe(df)
-
-# Display the latest notification
+# แสดงข้อมูลล่าสุด
 if not df.empty:
-    last_record = df.iloc[-1]  # Get the last row of the DataFrame
-    notification = last_record.get('Notification', 'No notification available')  # Replace 'Notification' with the actual column name
+    last_record = df.iloc[-1]
+    notification = last_record.get('Notification', 'No notification available')
 
-    # Display the notification
     st.markdown("### Latest Notification")
     st.markdown(f"```\n{notification}\n```")
 else:
