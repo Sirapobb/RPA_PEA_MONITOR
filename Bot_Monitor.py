@@ -27,20 +27,86 @@ credentials_dict = {
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 gc = gspread.authorize(credentials)
 
-# เปิด Google Sheet ด้วย Key
-sh = gc.open_by_key('1T6tk1QDilil7QTLaTBiHq0yNLdQT3xQhqMQgZAlZCXs')
-worksheet = sh.worksheet("Notification")
+notification_sheet = sh.worksheet("Notification")
+notification_data = notification_sheet.get_all_records()
+df_notification = pd.DataFrame(notification_data)
 
-# ดึงข้อมูลจาก Google Sheets
-data = worksheet.get_all_records()
-df = pd.DataFrame(data)
+# Fetch data from "Logdata" sheet
+logdata_sheet = sh.worksheet("Logdata")
+logdata_data = logdata_sheet.get_all_records()
+df_logdata = pd.DataFrame(logdata_data)
 
-# แสดงข้อมูลล่าสุด
-if not df.empty:
-    last_record = df.iloc[-1]
-    notification = last_record.get('Notification', 'No notification available')
+def set_reason(row):
+    if row['RPA_Delete'] == 'No':
+        return 'ไม่เข้าเงื่อนไขที่ Bot ทำงาน ให้ Supervisor ตรวจสอบ'
+    elif row['RPA_Delete'] == 'Yes':
+        if row['RPA_SendSMS'] == 'No':
+            return 'Bot ทำการลบรายการใน e-service แล้ว แต่ยังไม่ได้ดำเนินการในขั้นตอนส่ง SMS และ VOC'
+        elif row['RPA_SendSMS'] == 'Yes':
+            return 'Bot ทำรายการลบรายการและส่ง sms เรียบร้อย เหลือขั้นตอน SendVOC ที่ยังไม่ได้ดำเนินการ'
+    return ''
 
-    st.markdown("### Latest Notification")
+def highlight_time(s,start):
+    return ['background-color: rgb(234, 226, 73); color: #000000;' if s['RPA_Starttime'] == start else '' for _ in s]
+
+def display_card(title, value):
+    html = f"""
+    <div style="
+        background-color: #F0F2F6;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+        padding: 15px;
+        text-align: center;
+        margin: 10px;
+    ">
+        <p style='font-size: 20px; font-weight: bold; color: #000000; margin: 0;'>{title}</p>
+        <p style='font-size: 30px; font-weight: bold; margin: 0; color: #a933dc;'>{value}</p>
+    </div>
+    """
+    st.markdown(html, unsafe_allow_html=True)
+
+# Display the latest notification
+if not df_notification.empty:
+    last_record = df_notification.iloc[-1]  # Get the last row of the Notification DataFrame
+    notification = last_record.get('Notification', 'No notification available')  # Replace 'Notification' with the actual column name
+    startdate = last_record.get('RPA_Startdate')
+    starttime = last_record.get('RPA_Starttime')
+
+    total_bot_cases = len(df_logdata[(df_logdata['RPA_Result'] == 'Yes') & (df_logdata['RPA_Startdate'] == startdate)])
+    display_card("Today Bot Working Cases", total_bot_cases)
+    #display_card("จำนวน Case ที่ Bot ทำงานในวันนี้", total_bot_cases)
+    # Display the notification
+    st.markdown("------------------------")
+    #st.markdown("##### 📢 การแจ้งเตือนล่าสุด")
+    st.markdown("#### 📢 Notification Lastest")
     st.markdown(f"```\n{notification}\n```")
+    st.markdown("------------------------")
+    # Filter Logdata for relevant entries
+    if not df_logdata.empty:
+        # Example: Filter Logdata for rows matching a specific column value
+        # Here, we're assuming the "Subject / Description" or another column in Logdata can be matched to the Notification
+        relevant_logs = df_logdata[['Ticket No.','RPA_Delete','RPA_SendSMS','RPA_SendVOC',
+                                               'RPA_Result','RPA_Startdate','RPA_Starttime']]
+        relevant_logs = relevant_logs[(relevant_logs['RPA_Result'] == 'No') & 
+                                      (relevant_logs['RPA_Startdate'] == startdate)]
+        
+        #relevant_logs = relevant_logs[(relevant_logs['RPA_Result'] == 'No') & 
+        #                              (relevant_logs['RPA_Startdate'] == '2024-12-13 0:00:00') &
+        #                              (relevant_logs['RPA_Starttime'] == '21:39')]
+        relevant_logs['Reason'] =  relevant_logs.apply(set_reason, axis=1)
+        relevant_logs = relevant_logs[['Ticket No.','RPA_Startdate','RPA_Starttime','Reason','RPA_Delete',
+                                       'RPA_SendSMS','RPA_SendVOC','RPA_Result']]
+        if not relevant_logs.empty:
+            relevant_logs = relevant_logs.reset_index(drop=True)
+            relevant_logs = relevant_logs[::-1] 
+            styled_logs = relevant_logs.style.apply(highlight_time, axis=1, args=(starttime,))
+            #styled_logs = relevant_logs.style.apply(highlight_time, axis=1)
+            #st.markdown("### Relevant Logs from Logdata Sheet")
+            #st.markdown("##### ⚠️ รายละเอียด Case ที่ Supervisor ต้องตรวจสอบ")
+            st.markdown("#### ⚠️ Case Detail for Supervisor Checking")
+            #st.dataframe(relevant_logs.reset_index(drop=True)) 
+            st.dataframe(styled_logs) 
+        else:
+            st.info("Bot ทำงานสำเร็จทุกเคสในรอบเวลานี้ ไม่มีรายการคงเหลือ")
 else:
     st.warning("No data available in the Notification sheet.")
