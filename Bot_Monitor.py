@@ -3,25 +3,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 
-theme_base = st.secrets["theme"]["base"]
-primary_color = st.secrets["theme"]["primaryColor"]
-background_color = st.secrets["theme"]["backgroundColor"]
-
-# Dynamically set theme (optional logic)
-st.markdown(
-    f"""
-    <style>
-        .reportview-container {{
-            background-color: {background_color};
-        }}
-        .sidebar .sidebar-content {{
-            background-color: {primary_color};
-        }}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-# ตั้งค่า Streamlit Page
 st.set_page_config(
     page_title="Notification Viewer",
     layout="wide",
