@@ -47,7 +47,7 @@ available_dates = df_logdata['Date'].sort_values().unique()
 
 # Default date: today - 1 day
 # default_date = (datetime.now() - timedelta(days=1)).date()
-default_date = (datetime.now())
+default_date = (datetime.now()).date()
 # Sidebar multi-select filter for date selection
 selected_dates = st.sidebar.multiselect(
     "Select Dates",
