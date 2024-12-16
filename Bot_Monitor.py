@@ -6,8 +6,7 @@ import pandas as pd
 st.set_page_config(
     page_title="Notification Viewer",
     layout="wide",
-    initial_sidebar_state="expanded",
-    theme="dark"
+    initial_sidebar_state="expanded"
 )
 
 # ใช้ Secrets โดยตรงจาก Streamlit
