@@ -31,7 +31,7 @@ credentials_dict = {
 }  # ไม่ต้องใช้ json.loads
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 gc = gspread.authorize(credentials)
-#sh = gc.open_by_key('1T6tk1QDilil7QTLaTBiHq0yNLdQT3xQhqMQgZAlZCXs')  # Replace with your Google Sheet key
+#sh = gc.open_by_key('--- google sheet key ---')  # Replace with your Google Sheet key
 sh = gc.open_by_key(st.secrets["GOOGLE_SHEETS"]["google_sheet_key"])
 
 # Fetch data from "Logdata" sheet
