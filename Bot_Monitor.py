@@ -25,8 +25,8 @@ credentials_dict = {
 }  # ไม่ต้องใช้ json.loads
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 gc = gspread.authorize(credentials)
-sh = gc.open_by_key('1T6tk1QDilil7QTLaTBiHq0yNLdQT3xQhqMQgZAlZCXs')
-
+#sh = gc.open_by_key('1T6tk1QDilil7QTLaTBiHq0yNLdQT3xQhqMQgZAlZCXs')
+sh = gc.open_by_key(st.secrets["GOOGLE_SHEETS"]["google_sheet_key"])
 notification_sheet = sh.worksheet("Notification")
 notification_data = notification_sheet.get_all_records()
 df_notification = pd.DataFrame(notification_data)
