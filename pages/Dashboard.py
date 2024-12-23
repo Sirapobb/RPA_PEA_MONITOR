@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 
 # Set Streamlit page configuration
 st.set_page_config(
-    page_title="Bot Visualization",
-    page_icon="🤖",
+    page_title="Dashboard",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
