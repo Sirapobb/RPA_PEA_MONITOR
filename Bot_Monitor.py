@@ -4,7 +4,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 
 st.set_page_config(
-    page_title="Notification Viewer",
+    page_title="Bot Monitoring",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
