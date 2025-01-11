@@ -116,6 +116,12 @@ def create_excel_download(summary_report):
             if len(sheet_name) > 31:
                 sheet_name = sheet_name[:31]
             
+            # Format all `% Bot Working` values to 2 decimal places
+            data['% Bot Working'] = data.apply(
+                lambda row: round((row['Bot Working Case'] / row['Total Case'] * 100), 2)
+                if row['Total Case'] > 0 else 0, axis=1
+            )
+
             # Calculate Total row
             total_row = data.select_dtypes(include=['number']).sum()
             total_row['Date'] = 'Total'
