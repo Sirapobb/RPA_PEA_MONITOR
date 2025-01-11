@@ -104,6 +104,8 @@ def create_excel_download(summary_report):
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
         for date, data in summary_report.groupby("Date"):
             sheet_name = str(date)
+            # Ensure 'Date' column is formatted correctly before writing to Excel
+            data['Date'] = data['Date'].dt.strftime('%d-%b-%y')
             data.to_excel(writer, index=False, sheet_name=sheet_name)
             workbook = writer.book
             worksheet = writer.sheets[sheet_name]
@@ -139,6 +141,7 @@ def create_excel_download(summary_report):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
     output.seek(0)
     return output
+
 
 # Generate and download formatted Excel report
 excel_data = create_excel_download(summary_report)
