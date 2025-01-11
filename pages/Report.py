@@ -110,28 +110,6 @@ stacked_bar_fig = px.bar(
 )
 st.plotly_chart(stacked_bar_fig, use_container_width=True)
 
-# Chart 2: Line Chart (Total Cases Trend)
-st.write("### Line Chart: Total Cases Trend")
-line_chart_fig = px.line(
-    summary_report,
-    x='15_Minute_Interval',
-    y='Total Case',
-    title="Total Cases Trend by 15-Minute Interval",
-    labels={'15_Minute_Interval': 'Time Interval', 'Total Case': 'Number of Cases'}
-)
-st.plotly_chart(line_chart_fig, use_container_width=True)
-
-# Chart 3: Pie Chart (Bot vs Supervisor Proportion)
-st.write("### Pie Chart: Proportion of Bot vs Supervisor")
-pie_chart_fig = px.pie(
-    summary_report,
-    values='Total Case',
-    names='15_Minute_Interval',
-    title="Proportion of Total Cases Handled by Bot and Supervisor",
-    hole=0.4
-)
-st.plotly_chart(pie_chart_fig, use_container_width=True)
-
 # Chart 4: Heatmap (Density of Cases)
 st.write("### Heatmap: Density of Cases")
 heatmap_fig = px.density_heatmap(
