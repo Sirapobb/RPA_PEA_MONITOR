@@ -1,7 +1,10 @@
 import streamlit as st
+import gspread
 import pandas as pd
 import plotly.express as px
+from oauth2client.service_account import ServiceAccountCredentials
 from io import BytesIO
+from datetime import datetime, timedelta
 
 # Set Streamlit page configuration
 st.set_page_config(
@@ -13,72 +16,135 @@ st.set_page_config(
 
 st.markdown("### Bot Performance Dashboard")
 
-# Example DataFrame for demonstration
-data = {
-    "Date": ["20-Dec-24"] * 16,
-    "15_Minute_Interval": [
-        "00:00", "00:15", "00:30", "00:45", "01:00", "01:15", "01:30", "01:45",
-        "02:00", "02:15", "02:30", "02:45", "03:00", "03:15", "03:30", "03:45"
-    ],
-    "Bot": [0] * 16,
-    "Supervisor": [0] * 16,
-    "Total Case": [0] * 16,
-    "Bot Working Case": [0] * 16,
-    "Supervisor Working Case": [0] * 16,
-    "% Bot Working": [0.0] * 16,
+# Authenticate and connect to Google Sheets
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+credentials_dict = {
+    "type": st.secrets["GOOGLE_SHEETS"]["type"],
+    "project_id": st.secrets["GOOGLE_SHEETS"]["project_id"],
+    "private_key_id": st.secrets["GOOGLE_SHEETS"]["private_key_id"],
+    "private_key": st.secrets["GOOGLE_SHEETS"]["private_key"].replace("\\n", "\n"),
+    "client_email": st.secrets["GOOGLE_SHEETS"]["client_email"],
+    "client_id": st.secrets["GOOGLE_SHEETS"]["client_id"],
+    "auth_uri": st.secrets["GOOGLE_SHEETS"]["auth_uri"],
+    "token_uri": st.secrets["GOOGLE_SHEETS"]["token_uri"],
+    "auth_provider_x509_cert_url": st.secrets["GOOGLE_SHEETS"]["auth_provider_x509_cert_url"],
+    "client_x509_cert_url": st.secrets["GOOGLE_SHEETS"]["client_x509_cert_url"]
 }
-df = pd.DataFrame(data)
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+gc = gspread.authorize(credentials)
 
-# Define alternating row styles and centered text
-def style_dataframe(df):
-    # Alternating row colors and header styles
-    styles = [
-        dict(selector="thead th", props=[("background-color", "#8064A1"), ("color", "white"), ("text-align", "center")]),
-        dict(selector="tbody td", props=[("text-align", "center"), ("padding", "10px")]),
-        dict(selector="tbody tr:nth-child(even)", props=[("background-color", "#E3DFED")]),
-        dict(selector="tbody tr:nth-child(odd)", props=[("background-color", "white")]),
-    ]
-    return df.style.set_table_styles(styles).set_properties(**{
-        'text-align': 'center',
-        'padding': '10px'
-    })
+# Open the Google Sheet
+sh = gc.open_by_key(st.secrets["GOOGLE_SHEETS"]["google_sheet_key"])
 
-# Apply styling to the DataFrame
-styled_df = style_dataframe(df)
+# Fetch data from "Daily" sheet
+logdata_sheet = sh.worksheet("Daily")
+logdata_data = logdata_sheet.get_all_records()
+df_logdata = pd.DataFrame(logdata_data)
 
-# Render the styled DataFrame
-st.markdown("### Styled Table")
-st.write(
-    styled_df.to_html(index=False), unsafe_allow_html=True
+# Process data
+df_logdata['Created'] = pd.to_datetime(df_logdata['Created'], format='%d/%m/%Y %H:%M:%S')
+df_logdata['Date'] = df_logdata['Created'].dt.date
+df_logdata['15_Minute_Interval'] = df_logdata['Created'].dt.floor('15T').dt.strftime('%H:%M')
+
+# Generate all 15-minute intervals
+full_intervals = pd.date_range("00:00", "23:59", freq="15T").strftime('%H:%M').tolist()
+
+# Sidebar filter for date selection
+start_date = st.sidebar.date_input(
+    "Start Date",
+    value=df_logdata['Date'].min(),
+    min_value=df_logdata['Date'].min(),
+    max_value=df_logdata['Date'].max()
+)
+end_date = st.sidebar.date_input(
+    "End Date",
+    value=df_logdata['Date'].max(),
+    min_value=df_logdata['Date'].min(),
+    max_value=df_logdata['Date'].max()
 )
 
-# Example Plotly chart
-st.markdown("### Example Chart: Bot vs Supervisor Cases")
-fig = px.bar(
-    df,
-    x="15_Minute_Interval",
-    y=["Bot", "Supervisor"],
-    title="Bot vs Supervisor Cases by 15-Minute Interval",
-    labels={"value": "Cases", "variable": "Handled By"},
-    barmode="stack",
-)
-st.plotly_chart(fig, use_container_width=True)
+if start_date > end_date:
+    st.sidebar.error("Start Date must be before or the same as End Date.")
 
-# Excel download functionality
-def create_excel_download(df):
+# Filter data for the selected date range
+filtered_data = df_logdata[
+    (df_logdata['Date'] >= start_date) & (df_logdata['Date'] <= end_date)
+]
+
+# Summarize data by 15-minute intervals
+interval_grouped = filtered_data.groupby(['Date', '15_Minute_Interval', 'Response']).size().unstack(fill_value=0)
+interval_grouped['Total Case'] = interval_grouped.sum(axis=1)
+interval_grouped['Bot Working Case'] = interval_grouped.get('Bot', 0)
+interval_grouped['Supervisor Working Case'] = interval_grouped.get('Supervisor', 0)
+interval_grouped['% Bot Working'] = (
+    interval_grouped['Bot Working Case'] / interval_grouped['Total Case'] * 100
+).fillna(0).round(2)
+
+# Reset index to clean DataFrame
+interval_grouped = interval_grouped.reset_index()
+
+# Merge with all periods to ensure no missing intervals
+all_periods = pd.DataFrame(
+    [(date, interval) for date in pd.date_range(start_date, end_date).date for interval in full_intervals],
+    columns=['Date', '15_Minute_Interval']
+)
+summary_report = pd.merge(
+    all_periods, interval_grouped, 
+    on=['Date', '15_Minute_Interval'], 
+    how='left'
+).fillna(0)
+
+# Display summary report
+st.write("### Summary Report")
+st.dataframe(summary_report)
+
+# Function to create Excel download with formatted cells
+def create_excel_download(summary_report):
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-        df.to_excel(writer, index=False, sheet_name="Report")
+        for date, data in summary_report.groupby("Date"):
+            sheet_name = str(date)
+            data.to_excel(writer, index=False, sheet_name=sheet_name)
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+
+            # Define formatting
+            header_format = workbook.add_format({
+                'bold': True,
+                'align': 'center',
+                'valign': 'vcenter',
+                'bg_color': '#8064A1',
+                'font_color': 'white',
+                'border': 1
+            })
+            cell_format_odd = workbook.add_format({
+                'align': 'center',
+                'valign': 'vcenter',
+                'bg_color': 'white',
+                'border': 1
+            })
+            cell_format_even = workbook.add_format({
+                'align': 'center',
+                'valign': 'vcenter',
+                'bg_color': '#E3DFED',
+                'border': 1
+            })
+
+            # Apply formatting
+            for col_num, value in enumerate(data.columns):
+                worksheet.write(0, col_num, value, header_format)
+            for row_num, row_data in enumerate(data.values, start=1):
+                cell_format = cell_format_even if row_num % 2 == 0 else cell_format_odd
+                for col_num, cell_value in enumerate(row_data):
+                    worksheet.write(row_num, col_num, cell_value, cell_format)
     output.seek(0)
     return output
 
-# Generate Excel download
-excel_data = create_excel_download(df)
-
-st.markdown("### Download Report")
+# Generate and download formatted Excel report
+excel_data = create_excel_download(summary_report)
 st.download_button(
-    label="📥 Download Report as Excel",
+    label="📥 Download Report as Excel (Formatted)",
     data=excel_data,
-    file_name="Report.xlsx",
+    file_name="Daily_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
