@@ -116,12 +116,17 @@ def create_excel_download(summary_report):
             if len(sheet_name) > 31:
                 sheet_name = sheet_name[:31]
             
-            # Calculate Grand Total row
-            grand_total = data.select_dtypes(include=['number']).sum()
-            grand_total['Date'] = 'Grand Total'
-            grand_total['15_Minute_Interval'] = ''
-            grand_total_row = pd.DataFrame(grand_total).T
-            data_with_total = pd.concat([data, grand_total_row], ignore_index=True)
+            # Calculate Total row
+            total_row = data.select_dtypes(include=['number']).sum()
+            total_row['Date'] = 'Total'
+            total_row['15_Minute_Interval'] = ''
+            # Calculate % Bot Working for Total
+            total_row['% Bot Working'] = (
+                total_row['Bot Working Case'] / total_row['Total Case'] * 100
+                if total_row['Total Case'] > 0 else 0
+            )
+            total_row = pd.DataFrame(total_row).T
+            data_with_total = pd.concat([data, total_row], ignore_index=True)
 
             # Write to Excel
             data_with_total.to_excel(writer, index=False, sheet_name=sheet_name)
@@ -169,8 +174,6 @@ def create_excel_download(summary_report):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
     output.seek(0)
     return output
-
-
 
 
 # Generate and download formatted Excel report
