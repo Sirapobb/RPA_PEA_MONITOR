@@ -120,10 +120,10 @@ def create_excel_download(summary_report):
             total_row = data.select_dtypes(include=['number']).sum()
             total_row['Date'] = 'Total'
             total_row['15_Minute_Interval'] = ''
-            # Calculate % Bot Working for Total
-            total_row['% Bot Working'] = (
-                total_row['Bot Working Case'] / total_row['Total Case'] * 100
-                if total_row['Total Case'] > 0 else 0
+            # Calculate % Bot Working for Total with 2 decimal places
+            total_row['% Bot Working'] = round(
+                (total_row['Bot Working Case'] / total_row['Total Case'] * 100)
+                if total_row['Total Case'] > 0 else 0, 2
             )
             total_row = pd.DataFrame(total_row).T
             data_with_total = pd.concat([data, total_row], ignore_index=True)
@@ -174,6 +174,7 @@ def create_excel_download(summary_report):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
     output.seek(0)
     return output
+
 
 
 # Generate and download formatted Excel report
