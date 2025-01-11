@@ -4,3 +4,4 @@ pandas
 oauth2client
 plotly
 openpyxl
+xlsxwriter
