@@ -109,7 +109,13 @@ def create_excel_download(summary_report):
             # Format 'Date' column as DD-MMM-YY
             data['Date'] = data['Date'].dt.strftime('%d-%b-%y')
             
-            sheet_name = str(date)
+            # Format the sheet name as DD-MMM-YY
+            sheet_name = pd.to_datetime(date).strftime('%d-%b-%y')
+            
+            # Limit sheet name to 31 characters (Excel limitation)
+            if len(sheet_name) > 31:
+                sheet_name = sheet_name[:31]
+            
             data.to_excel(writer, index=False, sheet_name=sheet_name)
             workbook = writer.book
             worksheet = writer.sheets[sheet_name]
@@ -145,6 +151,7 @@ def create_excel_download(summary_report):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
     output.seek(0)
     return output
+
 
 
 
