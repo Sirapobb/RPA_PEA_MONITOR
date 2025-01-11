@@ -120,7 +120,7 @@ def create_excel_download(summary_report):
             cell_format_odd = workbook.add_format({
                 'align': 'center',
                 'valign': 'vcenter',
-                'bg_color': 'white',
+                'bg_color': '#E3DFED',
                 'border': 1
             })
             cell_format_even = workbook.add_format({
