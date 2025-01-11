@@ -108,7 +108,7 @@ def create_excel_download(summary_report):
                 data['Date'] = pd.to_datetime(data['Date'])
             # Format 'Date' column as DD-MMM-YY
             data['Date'] = data['Date'].dt.strftime('%d-%b-%y')
-            
+
             # Format the sheet name as DD-MMM-YY
             sheet_name = pd.to_datetime(date).strftime('%d-%b-%y')
             
@@ -116,7 +116,15 @@ def create_excel_download(summary_report):
             if len(sheet_name) > 31:
                 sheet_name = sheet_name[:31]
             
-            data.to_excel(writer, index=False, sheet_name=sheet_name)
+            # Calculate Grand Total row
+            grand_total = data.select_dtypes(include=['number']).sum()
+            grand_total['Date'] = 'Grand Total'
+            grand_total['15_Minute_Interval'] = ''
+            grand_total_row = pd.DataFrame(grand_total).T
+            data_with_total = pd.concat([data, grand_total_row], ignore_index=True)
+
+            # Write to Excel
+            data_with_total.to_excel(writer, index=False, sheet_name=sheet_name)
             workbook = writer.book
             worksheet = writer.sheets[sheet_name]
 
@@ -141,12 +149,22 @@ def create_excel_download(summary_report):
                 'bg_color': '#E3DFED',
                 'border': 1
             })
+            total_row_format = workbook.add_format({
+                'bold': True,
+                'align': 'center',
+                'valign': 'vcenter',
+                'bg_color': '#F4B084',
+                'border': 1
+            })
 
             # Apply formatting
             for col_num, value in enumerate(data.columns):
                 worksheet.write(0, col_num, value, header_format)
-            for row_num, row_data in enumerate(data.values, start=1):
-                cell_format = cell_format_even if row_num % 2 == 0 else cell_format_odd
+
+            for row_num, row_data in enumerate(data_with_total.values, start=1):
+                cell_format = total_row_format if row_num == len(data_with_total) else (
+                    cell_format_even if row_num % 2 == 0 else cell_format_odd
+                )
                 for col_num, cell_value in enumerate(row_data):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
     output.seek(0)
