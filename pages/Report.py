@@ -238,3 +238,19 @@ st.download_button(
     file_name="Daily_Report_With_Summary.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
+def style_summary(df):
+    styled = df.style.format({"% Bot Working": "{:.2f}"}).applymap(
+        lambda x: "background-color: #E3DFED; text-align: center;"
+    ).set_properties(**{
+        'text-align': 'center',
+        'border': '1px solid black',
+        'background-color': '#E3DFED'
+    }).apply(
+        lambda x: ["background-color: #F4B084;" if x.name == len(df) - 1 else "" for _ in x],
+        axis=1
+    )
+    return styled
+
+st.write("### Summary Report")
+st.dataframe(style_summary(summary_with_total), use_container_width=True)
