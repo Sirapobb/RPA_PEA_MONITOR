@@ -180,7 +180,10 @@ def create_excel_download(summary_report):
             'font_color': 'white',
             'border': 1
         })
-
+        # Set column widths for the Summary sheet
+        for col_num, column_name in enumerate(summary_with_total.columns):
+            col_width = max(len(column_name), 15)  # Adjust the column width dynamically
+            summary_worksheet.set_column(col_num, col_num, col_width)
         # Apply formatting to the Summary sheet
         for col_num, value in enumerate(summary_with_total.columns):
             summary_worksheet.write(0, col_num, value, header_format)
