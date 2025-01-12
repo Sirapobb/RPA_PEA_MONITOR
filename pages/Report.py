@@ -213,11 +213,13 @@ def create_excel_download(summary_report):
                 cell_format = workbook.add_format({
                     'align': 'center',
                     'valign': 'vcenter',
+                    'bg_color': '#E3DFED',
                     'border': 1
                 })
                 if row_num == len(data_with_total):  # Format the "Total" row
                     cell_format.set_bold(True)
-                    cell_format.set_bg_color('#F4B084')
+                    cell_format.set_bg_color('#3B3838')
+                    cell_format.set_front_color('white')
                 for col_num, cell_value in enumerate(row_data):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
 
