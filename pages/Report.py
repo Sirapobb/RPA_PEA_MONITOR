@@ -49,16 +49,21 @@ df_logdata['15_Minute_Interval'] = df_logdata['Created'].dt.floor('15T').dt.strf
 # Generate all 15-minute intervals
 full_intervals = pd.date_range("00:00", "23:59", freq="15T").strftime('%H:%M').tolist()
 
+# Calculate the latest month in the data
+latest_date = df_logdata['Date'].max()
+first_day_of_latest_month = latest_date.replace(day=1)
+last_day_of_latest_month = (first_day_of_latest_month + pd.offsets.MonthEnd(1)).date()
+
 # Sidebar filter for date selection
 start_date = st.sidebar.date_input(
     "Start Date",
-    value=df_logdata['Date'].min(),
+    value=first_day_of_latest_month,
     min_value=df_logdata['Date'].min(),
     max_value=df_logdata['Date'].max()
 )
 end_date = st.sidebar.date_input(
     "End Date",
-    value=df_logdata['Date'].max(),
+    value=last_day_of_latest_month,
     min_value=df_logdata['Date'].min(),
     max_value=df_logdata['Date'].max()
 )
