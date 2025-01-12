@@ -153,5 +153,3 @@ st.download_button(
     file_name="Daily_Report_With_Summary.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
-)
