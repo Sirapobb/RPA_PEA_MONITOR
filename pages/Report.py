@@ -126,6 +126,50 @@ st.plotly_chart(heatmap_fig, use_container_width=True)
 def create_excel_download(summary_report):
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        # Create Summary sheet
+        summary_data = summary_report.groupby('Date').agg(
+            Total_Case=('Total Case', 'sum'),
+            Bot_Working_Case=('Bot Working Case', 'sum'),
+            Supervisor_Working_Case=('Supervisor Working Case', 'sum'),
+        ).reset_index()
+
+        # Calculate % Bot Working with 2 decimal places
+        summary_data['% Bot Working'] = summary_data.apply(
+            lambda row: round((row['Bot_Working_Case'] / row['Total_Case'] * 100), 2)
+            if row['Total_Case'] > 0 else 0, axis=1
+        )
+
+        # Format the Date column
+        summary_data['Date'] = pd.to_datetime(summary_data['Date']).dt.strftime('%d-%b-%y')
+
+        # Write the Summary sheet to Excel
+        summary_data.to_excel(writer, index=False, sheet_name="Summary")
+        workbook = writer.book
+        summary_worksheet = writer.sheets["Summary"]
+
+        # Define formatting
+        header_format = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#8064A1',
+            'font_color': 'white',
+            'border': 1
+        })
+        cell_format = workbook.add_format({
+            'align': 'center',
+            'valign': 'vcenter',
+            'border': 1
+        })
+
+        # Apply formatting to the Summary sheet
+        for col_num, value in enumerate(summary_data.columns):
+            summary_worksheet.write(0, col_num, value, header_format)
+        for row_num, row_data in enumerate(summary_data.values, start=1):
+            for col_num, cell_value in enumerate(row_data):
+                summary_worksheet.write(row_num, col_num, cell_value, cell_format)
+
+        # Add individual sheets for each date
         for date, data in summary_report.groupby("Date"):
             # Ensure 'Date' column is in datetime format before formatting
             if not pd.api.types.is_datetime64_any_dtype(data['Date']):
@@ -160,51 +204,34 @@ def create_excel_download(summary_report):
 
             # Write to Excel
             data_with_total.to_excel(writer, index=False, sheet_name=sheet_name)
-            workbook = writer.book
             worksheet = writer.sheets[sheet_name]
 
-            # Define formatting
-            header_format = workbook.add_format({
-                'bold': True,
-                'align': 'center',
-                'valign': 'vcenter',
-                'bg_color': '#8064A1',
-                'font_color': 'white',
-                'border': 1
-            })
-            cell_format_odd = workbook.add_format({
-                'align': 'center',
-                'valign': 'vcenter',
-                'bg_color': 'white',
-                'border': 1
-            })
-            cell_format_even = workbook.add_format({
-                'align': 'center',
-                'valign': 'vcenter',
-                'bg_color': '#E3DFED',
-                'border': 1
-            })
-            total_row_format = workbook.add_format({
-                'bold': True,
-                'align': 'center',
-                'valign': 'vcenter',
-                'bg_color': '#F4B084',
-                'border': 1
-            })
-
-            # Apply formatting
+            # Apply formatting to the individual sheets
             for col_num, value in enumerate(data.columns):
                 worksheet.write(0, col_num, value, header_format)
-
             for row_num, row_data in enumerate(data_with_total.values, start=1):
-                cell_format = total_row_format if row_num == len(data_with_total) else (
-                    cell_format_even if row_num % 2 == 0 else cell_format_odd
-                )
+                cell_format = workbook.add_format({
+                    'align': 'center',
+                    'valign': 'vcenter',
+                    'border': 1
+                })
+                if row_num == len(data_with_total):  # Format the "Total" row
+                    cell_format.set_bold(True)
+                    cell_format.set_bg_color('#F4B084')
                 for col_num, cell_value in enumerate(row_data):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
+
     output.seek(0)
     return output
 
+# Generate and download Excel report
+excel_data = create_excel_download(summary_report)
+st.download_button(
+    label="📥 Download Report as Excel (With Summary)",
+    data=excel_data,
+    file_name="Daily_Report_With_Summary.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
 st.download_button(
