@@ -239,15 +239,39 @@ st.download_button(
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 
+def style_table(df):
+    def highlight_total_row(row):
+        """Highlight the 'Total' row with a specific style."""
+        if row.name == len(df) - 1:  # Last row is 'Total'
+            return ['background-color: #3B3838; color: white; font-weight: bold'] * len(row)
+        return ['background-color: #E3DFED; color: black'] * len(row)
+
+    styled_df = df.style \
+        .apply(highlight_total_row, axis=1) \
+        .set_table_styles(
+            [{'selector': 'thead th', 'props': [('background-color', '#8064A1'),
+                                                ('color', 'white'),
+                                                ('font-weight', 'bold'),
+                                                ('text-align', 'center')]}]
+        ) \
+        .format(precision=2, subset=['% Bot Working'])
+
+    return styled_df
+
+# Function to display Excel data in Streamlit
 def display_excel_in_streamlit(excel_data):
     # Read the Excel file from BytesIO
     excel_data.seek(0)  # Reset pointer to the beginning of the BytesIO stream
     excel_sheets = pd.read_excel(excel_data, sheet_name=None)  # Read all sheets
 
-    # Display each sheet
+    # Display each sheet with styling
     for sheet_name, df in excel_sheets.items():
         st.write(f"### Sheet: {sheet_name}")
-        st.dataframe(df)
+        if '% Bot Working' in df.columns:
+            styled_df = style_table(df)
+            st.write(styled_df.to_html(), unsafe_allow_html=True)
+        else:
+            st.dataframe(df)
 
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
