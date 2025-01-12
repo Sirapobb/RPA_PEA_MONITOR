@@ -95,8 +95,8 @@ summary_report = pd.merge(
 ).fillna(0)
 
 # Display summary report
-st.write("### Summary Report")
-st.dataframe(summary_report)
+#st.write("### Summary Report")
+#st.dataframe(summary_report)
 
 # Function to create Excel download
 def create_excel_download(summary_report):
