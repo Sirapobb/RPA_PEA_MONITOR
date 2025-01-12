@@ -98,30 +98,6 @@ summary_report = pd.merge(
 st.write("### Summary Report")
 st.dataframe(summary_report)
 
-# Chart: Stacked Bar Chart
-st.write("### Stacked Bar Chart: Bot vs Supervisor")
-stacked_bar_fig = px.bar(
-    summary_report,
-    x='15_Minute_Interval',
-    y=['Bot Working Case', 'Supervisor Working Case'],
-    title="Bot vs Supervisor Working Cases by 15-Minute Interval",
-    labels={'value': 'Cases', 'variable': 'Handled By'},
-    barmode='stack'
-)
-st.plotly_chart(stacked_bar_fig, use_container_width=True)
-
-# Chart: Heatmap
-st.write("### Heatmap: Density of Cases")
-heatmap_fig = px.density_heatmap(
-    summary_report,
-    x='15_Minute_Interval',
-    y='Date',
-    z='Total Case',
-    title="Heatmap of Case Density",
-    color_continuous_scale='Viridis'
-)
-st.plotly_chart(heatmap_fig, use_container_width=True)
-
 # Function to create Excel download
 def create_excel_download(summary_report):
     output = BytesIO()
