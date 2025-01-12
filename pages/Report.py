@@ -219,7 +219,7 @@ def create_excel_download(summary_report):
                 if row_num == len(data_with_total):  # Format the "Total" row
                     cell_format.set_bold(True)
                     cell_format.set_bg_color('#3B3838')
-                    cell_format.set_front_color('white')
+                    cell_format.set_font_color('white')
                 for col_num, cell_value in enumerate(row_data):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
 
