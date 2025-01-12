@@ -177,6 +177,7 @@ def create_excel_download(summary_report):
             'align': 'center',
             'valign': 'vcenter',
             'bg_color': '#3B3838',
+            'font_color': 'white',
             'border': 1
         })
 
