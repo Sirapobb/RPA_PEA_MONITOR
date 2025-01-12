@@ -229,6 +229,11 @@ def create_excel_download(summary_report):
             data_with_total.to_excel(writer, index=False, sheet_name=sheet_name)
             worksheet = writer.sheets[sheet_name]
 
+            # Set column widths for individual sheets
+            for col_num, column_name in enumerate(data_with_total.columns):
+                col_width = max(len(column_name), 15)  # Adjust the column width dynamically
+                worksheet.set_column(col_num, col_num, col_width)
+                
             # Apply formatting to the individual sheets
             for col_num, value in enumerate(data.columns):
                 worksheet.write(0, col_num, value, header_format)
