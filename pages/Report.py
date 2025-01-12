@@ -52,7 +52,7 @@ full_intervals = pd.date_range("00:00", "23:59", freq="15T").strftime('%H:%M').t
 # Sidebar filter for date selection
 start_date = st.sidebar.date_input(
     "Start Date",
-    value=df_logdata['Date'].max(),
+    value=df_logdata['Date'].max() - 10,
     min_value=df_logdata['Date'].min(),
     max_value=df_logdata['Date'].max()
 )
