@@ -49,17 +49,15 @@ df_logdata['15_Minute_Interval'] = df_logdata['Created'].dt.floor('15T').dt.strf
 # Generate all 15-minute intervals
 full_intervals = pd.date_range("00:00", "23:59", freq="15T").strftime('%H:%M').tolist()
 
-# Ensure 'latest_date' is converted to a datetime object
+# Calculate the latest month in the data
 latest_date = pd.to_datetime(df_logdata['Date'].max())
-
-# Calculate the first and last day of the latest month
 first_day_of_latest_month = latest_date.replace(day=1)
 last_day_of_latest_month = (first_day_of_latest_month + pd.offsets.MonthEnd(1)).date()
 
 # Sidebar filter for date selection
 start_date = st.sidebar.date_input(
     "Start Date",
-    value=first_day_of_latest_month,
+    value=first_day_of_latest_month.date(),
     min_value=df_logdata['Date'].min(),
     max_value=df_logdata['Date'].max()
 )
@@ -102,8 +100,8 @@ summary_report = pd.merge(
 ).fillna(0)
 
 # Display summary report
-#st.write("### Summary Report")
-#st.dataframe(summary_report)
+st.write("### Summary Report")
+st.dataframe(summary_report)
 
 # Function to create Excel download
 def create_excel_download(summary_report):
@@ -175,65 +173,6 @@ def create_excel_download(summary_report):
             for col_num, cell_value in enumerate(row_data):
                 summary_worksheet.write(row_num, col_num, cell_value, row_format)
 
-        # Add individual sheets for each date
-        for date, data in summary_report.groupby("Date"):
-            # Ensure 'Date' column is in datetime format before formatting
-            if not pd.api.types.is_datetime64_any_dtype(data['Date']):
-                data['Date'] = pd.to_datetime(data['Date'])
-            # Format 'Date' column as DD-MMM-YY
-            data['Date'] = data['Date'].dt.strftime('%d-%b-%y')
-
-            # Format the sheet name as DD-MMM-YY
-            sheet_name = pd.to_datetime(date).strftime('%d-%b-%y')
-            
-            # Limit sheet name to 31 characters (Excel limitation)
-            if len(sheet_name) > 31:
-                sheet_name = sheet_name[:31]
-            
-            # Format all % Bot Working values to 2 decimal places
-            data['% Bot Working'] = data.apply(
-                lambda row: round((row['Bot Working Case'] / row['Total Case'] * 100), 2)
-                if row['Total Case'] > 0 else 0, axis=1
-            )
-
-            # Calculate Total row
-            total_row = data.select_dtypes(include=['number']).sum()
-            total_row['Date'] = 'Total'
-            total_row['15_Minute_Interval'] = ''
-            # Calculate % Bot Working for Total with 2 decimal places
-            total_row['% Bot Working'] = round(
-                (total_row['Bot Working Case'] / total_row['Total Case'] * 100)
-                if total_row['Total Case'] > 0 else 0, 2
-            )
-            total_row = pd.DataFrame(total_row).T
-            data_with_total = pd.concat([data, total_row], ignore_index=True)
-
-            # Write to Excel
-            data_with_total.to_excel(writer, index=False, sheet_name=sheet_name)
-            worksheet = writer.sheets[sheet_name]
-
-            # Set column widths for individual sheets
-            for col_num, column_name in enumerate(data_with_total.columns):
-                col_width = max(len(column_name), 15)  # Adjust the column width dynamically
-                worksheet.set_column(col_num, col_num, col_width)
-                
-            # Apply formatting to the individual sheets
-            for col_num, value in enumerate(data.columns):
-                worksheet.write(0, col_num, value, header_format)
-            for row_num, row_data in enumerate(data_with_total.values, start=1):
-                cell_format = workbook.add_format({
-                    'align': 'center',
-                    'valign': 'vcenter',
-                    'bg_color': '#E3DFED',
-                    'border': 1
-                })
-                if row_num == len(data_with_total):  # Format the "Total" row
-                    cell_format.set_bold(True)
-                    cell_format.set_bg_color('#3B3838')
-                    cell_format.set_font_color('white')  # Corrected the method name
-                for col_num, cell_value in enumerate(row_data):
-                    worksheet.write(row_num, col_num, cell_value, cell_format)
-
     output.seek(0)
     return output
 
@@ -245,17 +184,3 @@ st.download_button(
     file_name="Daily_Report_With_Summary.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
-def display_excel_in_streamlit(excel_data):
-    # Read the Excel file from BytesIO
-    excel_data.seek(0)  # Reset pointer to the beginning of the BytesIO stream
-    excel_sheets = pd.read_excel(excel_data, sheet_name=None)  # Read all sheets
-    # Display each sheet
-    for sheet_name, df in excel_sheets.items():
-        st.write(f"### Sheet: {sheet_name}")
-        st.dataframe(df)
-# Generate and download Excel report
-excel_data = create_excel_download(summary_report)
-# Display the Excel data in Streamlit
-st.write("## Generated Excel Data Preview")
-display_excel_in_streamlit(excel_data)
