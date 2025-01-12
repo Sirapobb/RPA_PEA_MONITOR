@@ -169,13 +169,14 @@ def create_excel_download(summary_report):
         cell_format = workbook.add_format({
             'align': 'center',
             'valign': 'vcenter',
+            'bg_color': '#E3DFED',
             'border': 1
         })
         total_row_format = workbook.add_format({
             'bold': True,
             'align': 'center',
             'valign': 'vcenter',
-            'bg_color': '#F4B084',
+            'bg_color': '#3B3838',
             'border': 1
         })
 
@@ -250,15 +251,5 @@ st.download_button(
     label="📥 Download Report as Excel (With Summary)",
     data=excel_data,
     file_name="Daily_Report_With_Summary.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
-
-
-# Generate and download Excel report
-excel_data = create_excel_download(summary_report)
-st.download_button(
-    label="📥 Download Report as Excel (Formatted)",
-    data=excel_data,
-    file_name="Daily_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
