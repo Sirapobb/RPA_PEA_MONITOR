@@ -233,7 +233,7 @@ def create_excel_download(summary_report):
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
 st.download_button(
-    label="📥 Download Report as Excel (With Summary)",
+    label="📥 Select Start-End Date and Download Report Ecel File",
     data=excel_data,
     file_name="Daily_Report_With_Summary.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
