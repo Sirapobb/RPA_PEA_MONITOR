@@ -44,7 +44,7 @@ def set_reason(row):
         if row['RPA_SendSMS'] == 'No':
             return 'Bot ทำการลบรายการใน e-service แล้ว แต่ยังไม่ได้ดำเนินการในขั้นตอนส่ง SMS และ VOC'
         elif row['RPA_SendSMS'] == 'Yes':
-            return 'Bot ทำรายการลบรายการและส่ง sms เรียบร้อย เหลือขั้นตอน SendVOC ที่ยังไม่ได้ดำเนินการ'
+            return 'Bot ทำการลบรายการและส่ง sms เรียบร้อย เหลือขั้นตอน SendVOC ที่ยังไม่ได้ดำเนินการ'
     return ''
 
 def highlight_time(s,start):
