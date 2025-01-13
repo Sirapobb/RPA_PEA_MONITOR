@@ -233,10 +233,11 @@ def create_excel_download(summary_report):
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
 st.download_button(
-    label="📥 Download Report Excel File (You can select start - end date before download)",
+    label="📥 Download Report Excel File",
     data=excel_data,
     file_name="Daily_Report_With_Summary.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    help="You can select start - end date before download"
 )
 
 def display_excel_in_streamlit(excel_data):
