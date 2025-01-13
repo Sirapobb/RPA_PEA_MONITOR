@@ -128,6 +128,9 @@ def create_excel_download(summary_report):
         total_row = pd.DataFrame(total_row).T
         summary_with_total = pd.concat([summary_data, total_row], ignore_index=True)
 
+        # Drop unwanted columns from the Summary sheet
+        summary_with_total = summary_with_total.drop(columns=['Bot_Working_Case', 'Supervisor_Working_Case'])
+
         # Write the Summary sheet to Excel
         summary_with_total.to_excel(writer, index=False, sheet_name="Summary")
         workbook = writer.book
@@ -156,10 +159,12 @@ def create_excel_download(summary_report):
             'font_color': 'white',
             'border': 1
         })
+
         # Set column widths for the Summary sheet
         for col_num, column_name in enumerate(summary_with_total.columns):
             col_width = max(len(column_name), 15)  # Adjust the column width dynamically
             summary_worksheet.set_column(col_num, col_num, col_width)
+        
         # Apply formatting to the Summary sheet
         for col_num, value in enumerate(summary_with_total.columns):
             summary_worksheet.write(0, col_num, value, header_format)
@@ -175,6 +180,9 @@ def create_excel_download(summary_report):
                 data['Date'] = pd.to_datetime(data['Date'])
             # Format 'Date' column as DD-MMM-YY
             data['Date'] = data['Date'].dt.strftime('%d-%b-%y')
+
+            # Drop unwanted columns from individual sheets
+            data = data.drop(columns=['Bot', 'Supervisor'], errors='ignore')
 
             # Format the sheet name as DD-MMM-YY
             sheet_name = pd.to_datetime(date).strftime('%d-%b-%y')
@@ -211,7 +219,7 @@ def create_excel_download(summary_report):
                 worksheet.set_column(col_num, col_num, col_width)
                 
             # Apply formatting to the individual sheets
-            for col_num, value in enumerate(data.columns):
+            for col_num, value in enumerate(data_with_total.columns):
                 worksheet.write(0, col_num, value, header_format)
             for row_num, row_data in enumerate(data_with_total.values, start=1):
                 cell_format = workbook.add_format({
@@ -223,12 +231,13 @@ def create_excel_download(summary_report):
                 if row_num == len(data_with_total):  # Format the "Total" row
                     cell_format.set_bold(True)
                     cell_format.set_bg_color('#3B3838')
-                    cell_format.set_font_color('white')  # Corrected the method name
+                    cell_format.set_font_color('white')
                 for col_num, cell_value in enumerate(row_data):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
 
     output.seek(0)
     return output
+
 
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
