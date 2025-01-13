@@ -129,7 +129,7 @@ def create_excel_download(summary_report):
         summary_with_total = pd.concat([summary_data, total_row], ignore_index=True)
 
         # Drop unwanted columns from the Summary sheet
-        summary_with_total = summary_with_total.drop(columns=['Bot_Working_Case', 'Supervisor_Working_Case'])
+        # summary_with_total = summary_with_total.drop(columns=['Bot_Working_Case', 'Supervisor_Working_Case'])
 
         # Write the Summary sheet to Excel
         summary_with_total.to_excel(writer, index=False, sheet_name="Summary")
