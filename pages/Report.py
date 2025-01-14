@@ -39,7 +39,7 @@ df_logdata = pd.DataFrame(logdata_data)
 # Process data
 df_logdata['Created'] = pd.to_datetime(df_logdata['Created'], format='%d/%m/%Y %H:%M:%S')
 df_logdata['Date'] = df_logdata['Created'].dt.date
-df_logdata['15_Minute_Interval'] = df_logdata['Created'].dt.floor('15T').dt.strftime('%H:%M')
+df_logdata['15 Minute Interval'] = df_logdata['Created'].dt.floor('15T').dt.strftime('%H:%M')
 # Generate all 15-minute intervals
 full_intervals = pd.date_range("00:00", "23:59", freq="15T").strftime('%H:%M').tolist()
 # Sidebar filter for date selection
@@ -62,7 +62,7 @@ filtered_data = df_logdata[
     (df_logdata['Date'] >= start_date) & (df_logdata['Date'] <= end_date)
 ]
 # Summarize data by 15-minute intervals
-interval_grouped = filtered_data.groupby(['Date', '15_Minute_Interval', 'Response']).size().unstack(fill_value=0)
+interval_grouped = filtered_data.groupby(['Date', '15 Minute Interval', 'Response']).size().unstack(fill_value=0)
 interval_grouped['Total Case'] = interval_grouped.sum(axis=1)
 interval_grouped['Bot Working Case'] = interval_grouped.get('Bot', 0)
 interval_grouped['Supervisor Working Case'] = interval_grouped.get('Supervisor', 0)
@@ -74,11 +74,11 @@ interval_grouped = interval_grouped.reset_index()
 # Merge with all periods to ensure no missing intervals
 all_periods = pd.DataFrame(
     [(date, interval) for date in pd.date_range(start_date, end_date).date for interval in full_intervals],
-    columns=['Date', '15_Minute_Interval']
+    columns=['Date', '15 Minute Interval']
 )
 summary_report = pd.merge(
     all_periods, interval_grouped, 
-    on=['Date', '15_Minute_Interval'], 
+    on=['Date', '15 Minute Interval'], 
     how='left'
 ).fillna(0)
 # Display summary report
@@ -175,7 +175,7 @@ def create_excel_download(summary_report):
             # Calculate Total row
             total_row = data.select_dtypes(include=['number']).sum()
             total_row['Date'] = 'Total'
-            total_row['15_Minute_Interval'] = ''
+            total_row['15 Minute Interval'] = ''
             # Calculate % Bot Working for Total with 2 decimal places
             total_row['% Bot Working'] = round(
                 (total_row['Bot Working Case'] / total_row['Total Case'] * 100)
