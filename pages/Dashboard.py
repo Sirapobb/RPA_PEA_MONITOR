@@ -52,13 +52,13 @@ st.write("Debug: Data after processing", df_logdata.head())
 # Get all unique dates in the dataset
 available_dates = df_logdata['Date'].sort_values().unique()
 
-# Default date: today - 1 day
-default_date = (datetime.now() - timedelta(days=1)).date()
+# Default to the latest day in the dataset
+default_date = max(available_dates)
 
 # Sidebar input for start and end date selection
 start_date, end_date = st.sidebar.date_input(
     "Select Date Range",
-    value=(default_date - timedelta(days=7), default_date),  # Default to the past 7 days
+    value=(default_date, default_date),  # Default to the latest day
     min_value=min(available_dates),  # Earliest available date in the dataset
     max_value=max(available_dates)  # Latest available date in the dataset
 )
