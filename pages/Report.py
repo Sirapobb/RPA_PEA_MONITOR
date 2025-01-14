@@ -224,7 +224,7 @@ def display_excel_in_streamlit(excel_data):
     excel_sheets = pd.read_excel(excel_data, sheet_name=None)  # Read all sheets
     # Display each sheet
     for sheet_name, df in excel_sheets.items():
-        st.write({sheet_name})
+        st.write(sheet_name)
         st.dataframe(df)
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
