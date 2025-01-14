@@ -2,8 +2,6 @@ import streamlit as st
 import gspread
 import pandas as pd
 import plotly.express as px
-import seaborn as sns
-import matplotlib.pyplot as plt
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime, timedelta
 
@@ -170,11 +168,18 @@ else:
     # Display the line chart
     st.plotly_chart(line_fig, use_container_width=True)
 
-    # KDE Plot for Distribution Across 24 Hours
+    # Stacked Histogram for Distribution Across 24 Hours
     st.markdown("### Distribution of Cases Over 24 Hours")
-    plt.figure(figsize=(10, 6))
-    sns.kdeplot(filtered_data['Hour'], fill=True, color="purple", alpha=0.7)
-    plt.title("KDE Plot: Distribution of Cases Over 24 Hours", fontsize=16)
-    plt.xlabel("Hour of the Day", fontsize=12)
-    plt.ylabel("Density", fontsize=12)
-    st.pyplot(plt)
+    hist_fig = px.histogram(
+        filtered_data,
+        x="Hour",
+        color="Response",
+        barmode="stack",
+        nbins=24,
+        labels={"Hour": "Hour of the Day", "Response": "Handled By"},
+        title="Distribution of Cases Over 24 Hours"
+    )
+    hist_fig.update_layout(xaxis_title="Hour of the Day", yaxis_title="Count", legend_title="Handled By")
+
+    # Display the stacked histogram
+    st.plotly_chart(hist_fig, use_container_width=True)
