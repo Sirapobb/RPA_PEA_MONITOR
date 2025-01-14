@@ -44,11 +44,10 @@ if df_logdata['Created'].isna().any():
     st.error("Some 'Created' column values could not be parsed as datetime.")
 else:
     df_logdata['Date'] = df_logdata['Created'].dt.date
-    df_logdata['TimeInterval'] = df_logdata['Created'].dt.floor('30T')
-    df_logdata['Hour'] = df_logdata['Created'].dt.hour
+    df_logdata['TimeInterval'] = df_logdata['Created'].dt.floor('15T')
 
 # Debugging: Check the DataFrame
-st.write("Debug: Data after processing", df_logdata.head())
+# st.write("Debug: Data after processing", df_logdata.head())
 
 # Get all unique dates in the dataset
 available_dates = df_logdata['Date'].sort_values().unique()
@@ -130,7 +129,7 @@ else:
         color='Response',
         barmode='stack',
         labels={'TimeInterval': 'Time Interval', 'Count': 'Case Count', 'Response': 'Handled By'},
-        title="Case Distribution by 30-Minute Intervals",
+        title="Case Distribution by 15-Minute Intervals",
         color_discrete_map={
             "Bot": "#a933dc",          # Purple for Bot
             "Supervisor": "#eed3ff"    # Light purple for Supervisor
@@ -146,7 +145,7 @@ else:
 
     # Time Series Line Chart: Count of Cases Over Time (all day data)
     time_series_data = df_logdata.groupby('TimeInterval').size().reset_index(name='Count')
-    st.write("Debug: Time Series Data", time_series_data.head())
+    # st.write("Debug: Time Series Data", time_series_data.head())
 
     line_fig = px.line(
         time_series_data,
@@ -167,19 +166,3 @@ else:
 
     # Display the line chart
     st.plotly_chart(line_fig, use_container_width=True)
-
-    # Stacked Histogram for Distribution Across 24 Hours
-    st.markdown("### Distribution of Cases Over 24 Hours")
-    hist_fig = px.histogram(
-        filtered_data,
-        x="Hour",
-        color="Response",
-        barmode="stack",
-        nbins=24,
-        labels={"Hour": "Hour of the Day", "Response": "Handled By"},
-        title="Distribution of Cases Over 24 Hours"
-    )
-    hist_fig.update_layout(xaxis_title="Hour of the Day", yaxis_title="Count", legend_title="Handled By")
-
-    # Display the stacked histogram
-    st.plotly_chart(hist_fig, use_container_width=True)
