@@ -13,9 +13,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
 st.markdown("### Bot Performance Dashboard")
-
 # Authenticate and connect to Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 credentials_dict = {
@@ -32,23 +30,18 @@ credentials_dict = {
 }
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 gc = gspread.authorize(credentials)
-
 # Open the Google Sheet
 sh = gc.open_by_key(st.secrets["GOOGLE_SHEETS"]["google_sheet_key"])
-
 # Fetch data from "Daily" sheet
 logdata_sheet = sh.worksheet("Daily")
 logdata_data = logdata_sheet.get_all_records()
 df_logdata = pd.DataFrame(logdata_data)
-
 # Process data
 df_logdata['Created'] = pd.to_datetime(df_logdata['Created'], format='%d/%m/%Y %H:%M:%S')
 df_logdata['Date'] = df_logdata['Created'].dt.date
 df_logdata['15_Minute_Interval'] = df_logdata['Created'].dt.floor('15T').dt.strftime('%H:%M')
-
 # Generate all 15-minute intervals
 full_intervals = pd.date_range("00:00", "23:59", freq="15T").strftime('%H:%M').tolist()
-
 # Sidebar filter for date selection
 start_date = st.sidebar.date_input(
     "Start Date",
@@ -62,15 +55,12 @@ end_date = st.sidebar.date_input(
     min_value=df_logdata['Date'].min(),
     max_value=df_logdata['Date'].max()
 )
-
 if start_date > end_date:
     st.sidebar.error("Start Date must be before or the same as End Date.")
-
 # Filter data for the selected date range
 filtered_data = df_logdata[
     (df_logdata['Date'] >= start_date) & (df_logdata['Date'] <= end_date)
 ]
-
 # Summarize data by 15-minute intervals
 interval_grouped = filtered_data.groupby(['Date', '15_Minute_Interval', 'Response']).size().unstack(fill_value=0)
 interval_grouped['Total Case'] = interval_grouped.sum(axis=1)
@@ -79,10 +69,8 @@ interval_grouped['Supervisor Working Case'] = interval_grouped.get('Supervisor',
 interval_grouped['% Bot Working'] = (
     interval_grouped['Bot Working Case'] / interval_grouped['Total Case'] * 100
 ).fillna(0).round(2)
-
 # Reset index to clean DataFrame
 interval_grouped = interval_grouped.reset_index()
-
 # Merge with all periods to ensure no missing intervals
 all_periods = pd.DataFrame(
     [(date, interval) for date in pd.date_range(start_date, end_date).date for interval in full_intervals],
@@ -93,11 +81,9 @@ summary_report = pd.merge(
     on=['Date', '15_Minute_Interval'], 
     how='left'
 ).fillna(0)
-
 # Display summary report
 #st.write("### Summary Report")
 #st.dataframe(summary_report)
-
 # Function to create Excel download
 def create_excel_download(summary_report):
     output = BytesIO()
@@ -108,16 +94,13 @@ def create_excel_download(summary_report):
             Bot_Working_Case=('Bot Working Case', 'sum'),
             Supervisor_Working_Case=('Supervisor Working Case', 'sum'),
         ).reset_index()
-
         # Calculate % Bot Working with 2 decimal places
         summary_data['% Bot Working'] = summary_data.apply(
             lambda row: round((row['Bot_Working_Case'] / row['Total_Case'] * 100), 2)
             if row['Total_Case'] > 0 else 0, axis=1
         )
-
         # Format the Date column
         summary_data['Date'] = pd.to_datetime(summary_data['Date']).dt.strftime('%d-%b-%y')
-
         # Add Total row to Summary sheet
         total_row = summary_data.select_dtypes(include=['number']).sum()
         total_row['Date'] = 'Total'
@@ -127,12 +110,12 @@ def create_excel_download(summary_report):
         )
         total_row = pd.DataFrame(total_row).T
         summary_with_total = pd.concat([summary_data, total_row], ignore_index=True)
-
+        # Drop unwanted columns from the Summary sheet
+        # summary_with_total = summary_with_total.drop(columns=['Bot_Working_Case', 'Supervisor_Working_Case'])
         # Write the Summary sheet to Excel
         summary_with_total.to_excel(writer, index=False, sheet_name="Summary")
         workbook = writer.book
         summary_worksheet = writer.sheets["Summary"]
-
         # Define formatting
         header_format = workbook.add_format({
             'bold': True,
@@ -160,6 +143,7 @@ def create_excel_download(summary_report):
         for col_num, column_name in enumerate(summary_with_total.columns):
             col_width = max(len(column_name), 15)  # Adjust the column width dynamically
             summary_worksheet.set_column(col_num, col_num, col_width)
+        
         # Apply formatting to the Summary sheet
         for col_num, value in enumerate(summary_with_total.columns):
             summary_worksheet.write(0, col_num, value, header_format)
@@ -167,7 +151,6 @@ def create_excel_download(summary_report):
             row_format = total_row_format if row_num == len(summary_with_total) else cell_format
             for col_num, cell_value in enumerate(row_data):
                 summary_worksheet.write(row_num, col_num, cell_value, row_format)
-
         # Add individual sheets for each date
         for date, data in summary_report.groupby("Date"):
             # Ensure 'Date' column is in datetime format before formatting
@@ -175,7 +158,8 @@ def create_excel_download(summary_report):
                 data['Date'] = pd.to_datetime(data['Date'])
             # Format 'Date' column as DD-MMM-YY
             data['Date'] = data['Date'].dt.strftime('%d-%b-%y')
-
+            # Drop unwanted columns from individual sheets
+            data = data.drop(columns=['Bot', 'Supervisor'], errors='ignore')
             # Format the sheet name as DD-MMM-YY
             sheet_name = pd.to_datetime(date).strftime('%d-%b-%y')
             
@@ -188,7 +172,6 @@ def create_excel_download(summary_report):
                 lambda row: round((row['Bot Working Case'] / row['Total Case'] * 100), 2)
                 if row['Total Case'] > 0 else 0, axis=1
             )
-
             # Calculate Total row
             total_row = data.select_dtypes(include=['number']).sum()
             total_row['Date'] = 'Total'
@@ -200,18 +183,16 @@ def create_excel_download(summary_report):
             )
             total_row = pd.DataFrame(total_row).T
             data_with_total = pd.concat([data, total_row], ignore_index=True)
-
             # Write to Excel
             data_with_total.to_excel(writer, index=False, sheet_name=sheet_name)
             worksheet = writer.sheets[sheet_name]
-
             # Set column widths for individual sheets
             for col_num, column_name in enumerate(data_with_total.columns):
                 col_width = max(len(column_name), 15)  # Adjust the column width dynamically
                 worksheet.set_column(col_num, col_num, col_width)
                 
             # Apply formatting to the individual sheets
-            for col_num, value in enumerate(data.columns):
+            for col_num, value in enumerate(data_with_total.columns):
                 worksheet.write(0, col_num, value, header_format)
             for row_num, row_data in enumerate(data_with_total.values, start=1):
                 cell_format = workbook.add_format({
@@ -223,13 +204,11 @@ def create_excel_download(summary_report):
                 if row_num == len(data_with_total):  # Format the "Total" row
                     cell_format.set_bold(True)
                     cell_format.set_bg_color('#3B3838')
-                    cell_format.set_font_color('white')  # Corrected the method name
+                    cell_format.set_font_color('white')
                 for col_num, cell_value in enumerate(row_data):
                     worksheet.write(row_num, col_num, cell_value, cell_format)
-
     output.seek(0)
     return output
-
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
 st.download_button(
@@ -239,7 +218,6 @@ st.download_button(
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     help="You can select start - end date before download"
 )
-
 def display_excel_in_streamlit(excel_data):
     # Read the Excel file from BytesIO
     excel_data.seek(0)  # Reset pointer to the beginning of the BytesIO stream
@@ -253,4 +231,3 @@ excel_data = create_excel_download(summary_report)
 # Display the Excel data in Streamlit
 st.write("## Generated Excel Data Preview")
 display_excel_in_streamlit(excel_data)
-
