@@ -47,7 +47,7 @@ else:
     df_logdata['TimeInterval'] = df_logdata['Created'].dt.floor('30T')
 
 # Debugging: Check the DataFrame
-#st.write("Debug: Data after processing", df_logdata.head())
+st.write("Debug: Data after processing", df_logdata.head())
 
 # Get all unique dates in the dataset
 available_dates = df_logdata['Date'].sort_values().unique()
@@ -63,8 +63,19 @@ start_date, end_date = st.sidebar.date_input(
     max_value=max(available_dates)  # Latest available date in the dataset
 )
 
-# Filter data based on the selected date range
-filtered_data = df_logdata[(df_logdata['Date'] >= start_date) & (df_logdata['Date'] <= end_date)]
+# Sidebar input for dates to exclude
+exclude_dates = st.sidebar.multiselect(
+    "Exclude Specific Dates",
+    options=list(available_dates),
+    default=[]  # No default exclusion
+)
+
+# Filter data based on the selected date range and excluded dates
+filtered_data = df_logdata[
+    (df_logdata['Date'] >= start_date) & 
+    (df_logdata['Date'] <= end_date) & 
+    (~df_logdata['Date'].isin(exclude_dates))
+]
 
 # Handle empty DataFrame
 if filtered_data.empty:
@@ -131,7 +142,7 @@ else:
 
     # Time Series Line Chart: Count of Cases Over Time (all day data)
     time_series_data = df_logdata.groupby('TimeInterval').size().reset_index(name='Count')
-    #st.write("Debug: Time Series Data", time_series_data.head())
+    st.write("Debug: Time Series Data", time_series_data.head())
 
     line_fig = px.line(
         time_series_data,
