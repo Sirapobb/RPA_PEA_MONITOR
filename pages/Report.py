@@ -8,12 +8,12 @@ from datetime import datetime, timedelta
 
 # Set Streamlit page configuration
 st.set_page_config(
-    page_title="Bot Performance Dashboard",
+    page_title="Bot Performance Report",
     page_icon="📋",
     layout="wide",
     initial_sidebar_state="expanded",
 )
-st.markdown("### Bot Performance Dashboard")
+st.markdown("### Bot Performance Report)
 # Authenticate and connect to Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 credentials_dict = {
@@ -224,10 +224,10 @@ def display_excel_in_streamlit(excel_data):
     excel_sheets = pd.read_excel(excel_data, sheet_name=None)  # Read all sheets
     # Display each sheet
     for sheet_name, df in excel_sheets.items():
-        st.write(f"### Sheet: {sheet_name}")
+        st.write(f"### {sheet_name}")
         st.dataframe(df)
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
 # Display the Excel data in Streamlit
-st.write("## Generated Excel Data Preview")
+st.write("### Generated Excel Data Preview")
 display_excel_in_streamlit(excel_data)
