@@ -44,7 +44,7 @@ if df_logdata['Created'].isna().any():
     st.error("Some 'Created' column values could not be parsed as datetime.")
 else:
     df_logdata['Date'] = df_logdata['Created'].dt.date
-    df_logdata['TimeInterval'] = df_logdata['Created'].dt.floor('30T')
+    df_logdata['TimeInterval'] = df_logdata['Created'].dt.floor('15T')
 
 # Debugging: Check the DataFrame
 # st.write("Debug: Data after processing", df_logdata.head())
@@ -129,7 +129,7 @@ else:
         color='Response',
         barmode='stack',
         labels={'TimeInterval': 'Time Interval', 'Count': 'Case Count', 'Response': 'Handled By'},
-        title="Case Distribution by 30-Minute Intervals",
+        title="Case Distribution by 15-Minute Intervals",
         color_discrete_map={
             "Bot": "#a933dc",          # Purple for Bot
             "Supervisor": "#eed3ff"    # Light purple for Supervisor
