@@ -47,7 +47,7 @@ else:
     df_logdata['TimeInterval'] = df_logdata['Created'].dt.floor('30T')
 
 # Debugging: Check the DataFrame
-st.write("Debug: Data after processing", df_logdata.head())
+# st.write("Debug: Data after processing", df_logdata.head())
 
 # Get all unique dates in the dataset
 available_dates = df_logdata['Date'].sort_values().unique()
@@ -145,7 +145,7 @@ else:
 
     # Time Series Line Chart: Count of Cases Over Time (all day data)
     time_series_data = df_logdata.groupby('TimeInterval').size().reset_index(name='Count')
-    st.write("Debug: Time Series Data", time_series_data.head())
+    # st.write("Debug: Time Series Data", time_series_data.head())
 
     line_fig = px.line(
         time_series_data,
