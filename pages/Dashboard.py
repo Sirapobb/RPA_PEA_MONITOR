@@ -28,10 +28,9 @@ credentials_dict = {
     "token_uri": st.secrets["GOOGLE_SHEETS"]["token_uri"],
     "auth_provider_x509_cert_url": st.secrets["GOOGLE_SHEETS"]["auth_provider_x509_cert_url"],
     "client_x509_cert_url": st.secrets["GOOGLE_SHEETS"]["client_x509_cert_url"]
-}  # ไม่ต้องใช้ json.loads
+}
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 gc = gspread.authorize(credentials)
-#sh = gc.open_by_key('--- google sheet key ---')  # Replace with your Google Sheet key
 sh = gc.open_by_key(st.secrets["GOOGLE_SHEETS"]["google_sheet_key"])
 
 # Fetch data from "Logdata" sheet
@@ -46,19 +45,9 @@ df_logdata['Date'] = df_logdata['Created'].dt.date
 # Get all unique dates in the dataset
 available_dates = df_logdata['Date'].sort_values().unique()
 
-## Default date: today - 1 day
-#default_date = (datetime.now() - timedelta(days=1)).date()
-## default_date = (datetime.now()).date()
-## Sidebar multi-select filter for date selection
-#selected_dates = st.sidebar.multiselect(
-#    "Select Dates",
-#    options=['All Dates'] + list(available_dates),  # Include 'All Dates' option
-#    default=[default_date] if default_date in available_dates else ['All Dates'])
-## Filter data based on the selected dates
-#if 'All Dates' in selected_dates:
-#    filtered_data = df_logdata
-#else:
-#    filtered_data = df_logdata[df_logdata['Date'].isin(selected_dates)]
+# Default date: today - 1 day
+default_date = (datetime.now() - timedelta(days=1)).date()
+
 # Sidebar input for start and end date selection
 start_date, end_date = st.sidebar.date_input(
     "Select Date Range",
@@ -92,7 +81,6 @@ def display_card(title, value):
     """
     st.markdown(html, unsafe_allow_html=True)
 
-
 # Layout for Cards
 col1, col2, col3 = st.columns(3)
 
@@ -106,6 +94,7 @@ with col3:
     display_card("Supervisor Working Cases", total_not_success_cases)
 
 filtered_data['TimeInterval'] = filtered_data['Created'].dt.floor('30T')
+
 # Group by 'TimeInterval' and 'Response' to count cases for stacked bar chart
 interval_data = filtered_data.groupby(['TimeInterval', 'Response']).size().reset_index(name='Count')
 
@@ -131,9 +120,6 @@ bar_fig.update_layout(xaxis_title="Time Interval", yaxis_title="Count", legend_t
 # Display the stacked bar chart
 st.plotly_chart(bar_fig, use_container_width=True)
 
-# Create a '30-minute' interval column
-df_logdata['TimeInterval'] = df_logdata['Created'].dt.floor('30T')
-
 # Time Series Line Chart: Count of Cases Over Time
 time_series_data = df_logdata.groupby('TimeInterval').size().reset_index(name='Count')
 line_fig = px.line(
@@ -151,7 +137,6 @@ line_fig.update_traces(mode="lines+markers", line_color="#8902a0")
 line_fig.update_layout(
     xaxis_title="Time Interval",
     yaxis_title="Number of Cases"
-    #title_font=dict(size=20),  # Optional: Adjust title font size
 )
 
 # Display the line chart
