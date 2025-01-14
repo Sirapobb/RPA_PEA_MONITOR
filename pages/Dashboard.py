@@ -46,20 +46,29 @@ df_logdata['Date'] = df_logdata['Created'].dt.date
 # Get all unique dates in the dataset
 available_dates = df_logdata['Date'].sort_values().unique()
 
-# Default date: today - 1 day
-default_date = (datetime.now() - timedelta(days=1)).date()
-# default_date = (datetime.now()).date()
-# Sidebar multi-select filter for date selection
-selected_dates = st.sidebar.multiselect(
-    "Select Dates",
-    options=['All Dates'] + list(available_dates),  # Include 'All Dates' option
-    default=[default_date] if default_date in available_dates else ['All Dates']
+## Default date: today - 1 day
+#default_date = (datetime.now() - timedelta(days=1)).date()
+## default_date = (datetime.now()).date()
+## Sidebar multi-select filter for date selection
+#selected_dates = st.sidebar.multiselect(
+#    "Select Dates",
+#    options=['All Dates'] + list(available_dates),  # Include 'All Dates' option
+#    default=[default_date] if default_date in available_dates else ['All Dates'])
+## Filter data based on the selected dates
+#if 'All Dates' in selected_dates:
+#    filtered_data = df_logdata
+#else:
+#    filtered_data = df_logdata[df_logdata['Date'].isin(selected_dates)]
+# Sidebar input for start and end date selection
+start_date, end_date = st.sidebar.date_input(
+    "Select Date Range",
+    value=(default_date - timedelta(days=7), default_date),  # Default to the past 7 days
+    min_value=min(available_dates),  # Earliest available date in the dataset
+    max_value=max(available_dates)  # Latest available date in the dataset
 )
-# Filter data based on the selected dates
-if 'All Dates' in selected_dates:
-    filtered_data = df_logdata
-else:
-    filtered_data = df_logdata[df_logdata['Date'].isin(selected_dates)]
+
+# Filter data based on the selected date range
+filtered_data = df_logdata[(df_logdata['Date'] >= start_date) & (df_logdata['Date'] <= end_date)]
 
 # Calculate totals
 total_all_cases = len(filtered_data)
