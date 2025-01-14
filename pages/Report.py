@@ -90,14 +90,14 @@ def create_excel_download(summary_report):
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
         # Create Summary sheet
         summary_data = summary_report.groupby('Date').agg(
-            Total_Case=('Total Case', 'sum'),
-            Bot_Working_Case=('Bot Working Case', 'sum'),
-            Supervisor_Working_Case=('Supervisor Working Case', 'sum'),
+            Total Case=('Total Case', 'sum'),
+            Bot Working Case=('Bot Working Case', 'sum'),
+            Supervisor Working Case=('Supervisor Working Case', 'sum'),
         ).reset_index()
         # Calculate % Bot Working with 2 decimal places
         summary_data['% Bot Working'] = summary_data.apply(
-            lambda row: round((row['Bot_Working_Case'] / row['Total_Case'] * 100), 2)
-            if row['Total_Case'] > 0 else 0, axis=1
+            lambda row: round((row['Bot Working Case'] / row['Total Case'] * 100), 2)
+            if row['Total Case'] > 0 else 0, axis=1
         )
         # Format the Date column
         summary_data['Date'] = pd.to_datetime(summary_data['Date']).dt.strftime('%d-%b-%y')
@@ -105,13 +105,13 @@ def create_excel_download(summary_report):
         total_row = summary_data.select_dtypes(include=['number']).sum()
         total_row['Date'] = 'Total'
         total_row['% Bot Working'] = round(
-            (total_row['Bot_Working_Case'] / total_row['Total_Case'] * 100)
-            if total_row['Total_Case'] > 0 else 0, 2
+            (total_row['Bot Working Case'] / total_row['Total Case'] * 100)
+            if total_row['Total Case'] > 0 else 0, 2
         )
         total_row = pd.DataFrame(total_row).T
         summary_with_total = pd.concat([summary_data, total_row], ignore_index=True)
         # Drop unwanted columns from the Summary sheet
-        # summary_with_total = summary_with_total.drop(columns=['Bot_Working_Case', 'Supervisor_Working_Case'])
+        # summary_with_total = summary_with_total.drop(columns=['Bot Working Case', 'Supervisor Working Case'])
         # Write the Summary sheet to Excel
         summary_with_total.to_excel(writer, index=False, sheet_name="Summary")
         workbook = writer.book
