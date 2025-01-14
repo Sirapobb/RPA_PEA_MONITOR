@@ -63,10 +63,13 @@ start_date, end_date = st.sidebar.date_input(
     max_value=max(available_dates)  # Latest available date in the dataset
 )
 
+# Generate a list of dates within the selected range
+selected_date_range = pd.date_range(start=start_date, end=end_date).date
+
 # Sidebar input for dates to exclude
 exclude_dates = st.sidebar.multiselect(
     "Exclude Specific Dates",
-    options=list(available_dates),
+    options=[date for date in selected_date_range],  # Only show dates in the selected range
     default=[]  # No default exclusion
 )
 
