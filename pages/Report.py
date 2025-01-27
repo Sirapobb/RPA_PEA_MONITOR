@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 # Set Streamlit page configuration
 st.set_page_config(
-    page_title="Bot Performance ppppReport",
+    page_title="Bot Performance Report",
     page_icon="📋",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -114,6 +114,70 @@ def create_excel_download(summary_report):
         summary_with_total = pd.concat([summary_data, total_row], ignore_index=True)
         summary_with_total.to_excel(writer, index=False, sheet_name="Summary")
 
+        workbook = writer.book
+        summary_worksheet = writer.sheets["Summary"]
+
+        # Define formatting
+        header_format = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#8064A1',
+            'font_color': 'white',
+            'border': 1
+        })
+        cell_format = workbook.add_format({
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#E3DFED',
+            'border': 1
+        })
+        total_row_format = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#3B3838',
+            'font_color': 'white',
+            'border': 1
+        })
+        high_value_format = workbook.add_format({
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#C6EFCE',
+            'font_color': '#006100',
+            'border': 1
+        })
+        low_value_format = workbook.add_format({
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#FFC7CE',
+            'font_color': '#9C0006',
+            'border': 1
+        })
+
+        # Set column widths for the Summary sheet
+        for col_num, column_name in enumerate(summary_with_total.columns):
+            col_width = max(len(column_name), 15)
+            summary_worksheet.set_column(col_num, col_num, col_width)
+
+        # Apply formatting to the Summary sheet
+        for col_num, value in enumerate(summary_with_total.columns):
+            summary_worksheet.write(0, col_num, value, header_format)
+
+        for row_num, row_data in enumerate(summary_with_total.values, start=1):
+            row_format = total_row_format if row_num == len(summary_with_total) else cell_format
+            for col_num, cell_value in enumerate(row_data):
+                if col_num == 4:  # Apply conditional formatting to '% Bot Working' column
+                    cell_value_float = float(cell_value)
+                    if cell_value_float > 75:
+                        summary_worksheet.write(row_num, col_num, cell_value, high_value_format)
+                    elif cell_value_float < 50:
+                        summary_worksheet.write(row_num, col_num, cell_value, low_value_format)
+                    else:
+                        summary_worksheet.write(row_num, col_num, cell_value, cell_format)
+                else:
+                    summary_worksheet.write(row_num, col_num, cell_value, row_format)
+
         # Add individual sheets for each date
         for date, data in summary_report.groupby("Date"):
             data['% Bot Working'] = data.apply(
@@ -128,9 +192,34 @@ def create_excel_download(summary_report):
             total_row = pd.DataFrame(total_row).T
             data_with_total = pd.concat([data, total_row], ignore_index=True)
             data_with_total.to_excel(writer, index=False, sheet_name=pd.to_datetime(date).strftime('%d-%b-%y'))
+
+            worksheet = writer.sheets[pd.to_datetime(date).strftime('%d-%b-%y')]
+
+            # Set column widths for individual sheets
+            for col_num, column_name in enumerate(data_with_total.columns):
+                col_width = max(len(column_name), 15)
+                worksheet.set_column(col_num, col_num, col_width)
+
+            # Apply formatting to individual sheets
+            for col_num, value in enumerate(data_with_total.columns):
+                worksheet.write(0, col_num, value, header_format)
+
+            for row_num, row_data in enumerate(data_with_total.values, start=1):
+                row_format = total_row_format if row_num == len(data_with_total) else cell_format
+                for col_num, cell_value in enumerate(row_data):
+                    if col_num == 4:  # Apply conditional formatting to '% Bot Working' column
+                        cell_value_float = float(cell_value)
+                        if cell_value_float > 75:
+                            worksheet.write(row_num, col_num, cell_value, high_value_format)
+                        elif cell_value_float < 50:
+                            worksheet.write(row_num, col_num, cell_value, low_value_format)
+                        else:
+                            worksheet.write(row_num, col_num, cell_value, cell_format)
+                    else:
+                        worksheet.write(row_num, col_num, cell_value, row_format)
     output.seek(0)
     return output
-
+    
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
 st.download_button(
