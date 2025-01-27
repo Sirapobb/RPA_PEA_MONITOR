@@ -100,6 +100,8 @@ def create_excel_download(summary_report):
             Bot_Working_Case=('Bot Working Case', 'sum'),
             Supervisor_Working_Case=('Supervisor Working Case', 'sum'),
         ).reset_index()
+        # Format Date column as DD-MMM-YY
+        summary_data['Date'] = pd.to_datetime(summary_data['Date']).dt.strftime('%d-%b-%y')
         # Calculate % Bot Working with 2 decimal places
         summary_data['% Bot Working'] = summary_data.apply(
             lambda row: f"{(row['Bot_Working_Case'] / row['Total_Case'] * 100):.2f}"
@@ -157,6 +159,9 @@ def create_excel_download(summary_report):
 
         # Add individual sheets for each date
         for date, data in summary_report.groupby("Date"):
+            # Format Date column as DD-MMM-YY
+            data['Date'] = pd.to_datetime(data['Date']).dt.strftime('%d-%b-%y')
+            # Calculate % Bot Working with 2 decimal places
             data['% Bot Working'] = data.apply(
                 lambda row: f"{(row['Bot Working Case'] / row['Total Case'] * 100):.2f}"
                 if row['Total Case'] > 0 else "0.00", axis=1
@@ -187,7 +192,6 @@ def create_excel_download(summary_report):
                     worksheet.write(row_num, col_num, cell_value, row_format)
     output.seek(0)
     return output
-
     
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
