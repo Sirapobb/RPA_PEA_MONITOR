@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 # Set Streamlit page configuration
 st.set_page_config(
-    page_title="Bot Performance Report",
+    page_title="Bot Performance ppppReport",
     page_icon="📋",
     layout="wide",
     initial_sidebar_state="expanded",
