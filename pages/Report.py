@@ -202,3 +202,16 @@ st.download_button(
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     help="You can select start - end date before download"
 )
+def display_excel_in_streamlit(excel_data):
+    # Read the Excel file from BytesIO
+    excel_data.seek(0)  # Reset pointer to the beginning of the BytesIO stream
+    excel_sheets = pd.read_excel(excel_data, sheet_name=None)  # Read all sheets
+    # Display each sheet
+    for sheet_name, df in excel_sheets.items():
+        st.write(sheet_name)
+        st.dataframe(df)
+# Generate and download Excel report
+excel_data = create_excel_download(summary_report)
+# Display the Excel data in Streamlit
+st.write("### Generated Excel Data Preview")
+display_excel_in_streamlit(excel_data)
