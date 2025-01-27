@@ -153,16 +153,7 @@ def create_excel_download(summary_report):
         for row_num, row_data in enumerate(summary_with_total.values, start=1):
             row_format = total_row_format if row_num == len(summary_with_total) else cell_format
             for col_num, cell_value in enumerate(row_data):
-                if col_num == 4:  # Apply conditional formatting to '% Bot Working' column
-                    cell_value_float = float(cell_value)
-                    if cell_value_float > 75:
-                        summary_worksheet.write(row_num, col_num, cell_value, high_value_format)
-                    elif cell_value_float < 50:
-                        summary_worksheet.write(row_num, col_num, cell_value, low_value_format)
-                    else:
-                        summary_worksheet.write(row_num, col_num, cell_value, cell_format)
-                else:
-                    summary_worksheet.write(row_num, col_num, cell_value, row_format)
+                summary_worksheet.write(row_num, col_num, cell_value, row_format)
 
         # Add individual sheets for each date
         for date, data in summary_report.groupby("Date"):
@@ -193,18 +184,10 @@ def create_excel_download(summary_report):
             for row_num, row_data in enumerate(data_with_total.values, start=1):
                 row_format = total_row_format if row_num == len(data_with_total) else cell_format
                 for col_num, cell_value in enumerate(row_data):
-                    if col_num == 4:  # Apply conditional formatting to '% Bot Working' column
-                        cell_value_float = float(cell_value)
-                        if cell_value_float > 75:
-                            worksheet.write(row_num, col_num, cell_value, high_value_format)
-                        elif cell_value_float < 50:
-                            worksheet.write(row_num, col_num, cell_value, low_value_format)
-                        else:
-                            worksheet.write(row_num, col_num, cell_value, cell_format)
-                    else:
-                        worksheet.write(row_num, col_num, cell_value, row_format)
+                    worksheet.write(row_num, col_num, cell_value, row_format)
     output.seek(0)
     return output
+
     
 # Generate and download Excel report
 excel_data = create_excel_download(summary_report)
