@@ -140,20 +140,6 @@ def create_excel_download(summary_report):
             'font_color': 'white',
             'border': 1
         })
-        high_value_format = workbook.add_format({
-            'align': 'center',
-            'valign': 'vcenter',
-            'bg_color': '#C6EFCE',
-            'font_color': '#006100',
-            'border': 1
-        })
-        low_value_format = workbook.add_format({
-            'align': 'center',
-            'valign': 'vcenter',
-            'bg_color': '#FFC7CE',
-            'font_color': '#9C0006',
-            'border': 1
-        })
 
         # Set column widths for the Summary sheet
         for col_num, column_name in enumerate(summary_with_total.columns):
