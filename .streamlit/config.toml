@@ -1,5 +1,5 @@
 [theme]
-base = "dark"
+base = "Light"
 primaryColor = "#A259FF"              # Vibrant purple
 backgroundColor = "#1E1B2E"           # Very dark purple-ish background
 secondaryBackgroundColor = "#2D2840"  # Slightly lighter secondary background
