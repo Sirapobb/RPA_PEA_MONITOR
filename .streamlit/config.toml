@@ -1,5 +1,5 @@
 [theme]
-base = "dark"
+base = "light"
 primaryColor = "#CBA6F7"              # Soft pastel purple
 backgroundColor = "#1E1E2E"           # Deep bluish-purple background (minimal)
 secondaryBackgroundColor = "#313244"  # Subtle contrast for cards/sidebars
