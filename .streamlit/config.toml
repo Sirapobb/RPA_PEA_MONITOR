@@ -1,8 +1,8 @@
 [theme]
 base = "dark"
-primaryColor = "#00ADB5"
-backgroundColor = "#222831"
-secondaryBackgroundColor = "#393E46"
-textColor = "#EEEEEE"
-font = "monospace"
+primaryColor = "#A259FF"              # Vibrant purple
+backgroundColor = "#1E1B2E"           # Very dark purple-ish background
+secondaryBackgroundColor = "#2D2840"  # Slightly lighter secondary background
+textColor = "#FFFFFF"                 # Clean white text
+font = "sans serif"                   # Clean, modern look
 
