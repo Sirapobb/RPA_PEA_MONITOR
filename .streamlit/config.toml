@@ -1,7 +1,7 @@
 [theme]
 # base = "dark"
 primaryColor = "#CBA6F7"              # Soft pastel purple
-backgroundColor = "#1E1E2E"           # Deep bluish-purple background (minimal)
+backgroundColor = "#b770d8"           # Deep bluish-purple background (minimal)
 secondaryBackgroundColor = "#313244"  # Subtle contrast for cards/sidebars
 textColor = "#F5E0DC"                 # Soft pink-white for readability
 font = "monospace"
