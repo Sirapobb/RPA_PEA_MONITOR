@@ -1,8 +1,7 @@
 [theme]
-base = "light"
-primaryColor = "#CBA6F7"              # Soft pastel purple
-backgroundColor = "#1E1E2E"           # Deep bluish-purple background (minimal)
-secondaryBackgroundColor = "#313244"  # Subtle contrast for cards/sidebars
-textColor = "#F5E0DC"                 # Soft pink-white for readability
-font = "monospace"
-
+base = "dark"
+primaryColor = "#DDB6F2"              # Pastel purple (soft, modern)
+backgroundColor = "#1E1E2E"           # Deep bluish-purple (for dark mode)
+secondaryBackgroundColor = "#2A263D"  # Slightly lighter cards/boxes
+textColor = "#F8F8F2"                 # Off-white text for smooth contrast
+font = "sans serif"
