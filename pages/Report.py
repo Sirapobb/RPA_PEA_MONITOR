@@ -25,7 +25,7 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
     username_input = st.sidebar.text_input("Username")
     password_input = st.sidebar.text_input("Password", type="password")
-    login_btn = st.sidebar.button("Login")
+    login_btn = st.form_submit_button("Login")  # <-- รองรับการกด Enter
 
     if login_btn:
         if username_input == USERNAME and password_input == PASSWORD:
