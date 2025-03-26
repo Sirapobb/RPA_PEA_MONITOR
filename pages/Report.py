@@ -6,28 +6,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 from io import BytesIO
 from datetime import datetime, timedelta
 
-# --- Simple login ---
-st.sidebar.title("🔐 Login")
-USERNAME = "admin"
-PASSWORD = "1234"
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if not st.session_state.logged_in:
-    username_input = st.sidebar.text_input("Username")
-    password_input = st.sidebar.text_input("Password", type="password")
-    login_btn = st.sidebar.button("Login")
-
-    if login_btn:
-        if username_input == USERNAME and password_input == PASSWORD:
-            st.session_state.logged_in = True
-            st.success("Login successful!")
-            st.rerun()
-        else:
-            st.error("❌ Invalid username or password")
-    st.stop()
-
 # Set Streamlit page configuration
 st.set_page_config(
     page_title="Bot Performance Report",
