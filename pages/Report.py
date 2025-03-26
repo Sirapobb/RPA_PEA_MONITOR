@@ -23,6 +23,7 @@ if not st.session_state.logged_in:
         if username_input == USERNAME and password_input == PASSWORD:
             st.session_state.logged_in = True
             st.success("Login successful!")
+            st.experimental_rerun()  # <-- เพิ่มบรรทัดนี้
         else:
             st.error("❌ Invalid username or password")
     st.stop()
