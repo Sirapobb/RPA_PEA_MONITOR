@@ -1,8 +1,6 @@
 [theme]
-base = "dark"
-primaryColor = "#CBA6F7"              # Soft pastel purple
-backgroundColor = "#1E1E2E"           # Deep bluish-purple background (minimal)
-secondaryBackgroundColor = "#313244"  # Subtle contrast for cards/sidebars
-textColor = "#F5E0DC"                 # Soft pink-white for readability
-font = "monospace"
-
+primaryColor = "#5c2a9d"              # ม่วงเข้ม royal purple
+backgroundColor = "#f3eefc"           # ม่วงอ่อนอมเทา
+secondaryBackgroundColor = "#d8c8ec"  # เทาอมม่วง (sidebar, card)
+textColor = "#1e0b38"                 # เทาดำ อ่านง่ายบนพื้นม่วง
+font = "sans serif"
