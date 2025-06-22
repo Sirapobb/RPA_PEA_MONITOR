@@ -78,7 +78,7 @@ if not df_notification.empty:
     # Display the notification
     st.markdown("------------------------")
     #st.markdown("##### 📢 การแจ้งเตือนล่าสุด")
-    st.markdown("#### 📢 Notification Lastest")
+    st.markdown("#### Notification Lastest")
     #st.markdown(f"```\n{notification}\n```")
     st.code(notification, language='text')
     st.markdown("------------------------")
