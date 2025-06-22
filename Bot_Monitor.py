@@ -78,12 +78,12 @@ if not df_notification.empty:
     # Display the notification
     #st.markdown("------------------------")
     #st.markdown("##### 📢 การแจ้งเตือนล่าสุด")
-    st.write("------------------------")
+    #st.write("------------------------")
     #st.write("#### 📢 Notification Lastest")
     st.code("#### 📢 Notification Lastest", language="text")
     #st.markdown(f"```\n{notification}\n```")
     st.code(notification, language='text')
-    st.write("------------------------")
+    #st.write("------------------------")
     # Filter Logdata for relevant entries
     if not df_logdata.empty:
         # Example: Filter Logdata for rows matching a specific column value
