@@ -53,15 +53,14 @@ def highlight_time(s,start):
 def display_card(title, value):
     html = f"""
     <div style="
-        background-color: #F0F2F6;
-        border-radius: 10px;
-        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-        padding: 15px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        padding: 10px;
         text-align: center;
-        margin: 10px;
+        margin-bottom: 10px;
     ">
-        <p style='font-size: 20px; font-weight: bold; color: #000000; margin: 0;'>{title}</p>
-        <p style='font-size: 30px; font-weight: bold; margin: 0; color: #a933dc;'>{value}</p>
+        <div style="font-size: 16px; font-weight: bold; color: #000;">{title}</div>
+        <div style="font-size: 28px; font-weight: bold; color: #a933dc;">{value}</div>
     </div>
     """
     st.markdown(html, unsafe_allow_html=True)
