@@ -103,7 +103,7 @@ if not df_notification.empty:
             #styled_logs = relevant_logs.style.apply(highlight_time, axis=1)
             #st.markdown("### Relevant Logs from Logdata Sheet")
             #st.markdown("##### ⚠️ รายละเอียด Case ที่ Supervisor ต้องตรวจสอบ")
-            st.markdown("#### ⚠️ Case Detail for Supervisor Checking")
+            st.markdown("<h4>⚠️ Case Detail for Supervisor Checking</h4>", unsafe_allow_html=True)
             #st.dataframe(relevant_logs.reset_index(drop=True)) 
             st.dataframe(styled_logs) 
         else:
