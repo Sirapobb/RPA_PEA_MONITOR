@@ -76,12 +76,13 @@ if not df_notification.empty:
     display_card("Today Bot Working Cases", total_bot_cases)
     #display_card("จำนวน Case ที่ Bot ทำงานในวันนี้", total_bot_cases)
     # Display the notification
-    st.markdown("------------------------")
+    #st.markdown("------------------------")
     #st.markdown("##### 📢 การแจ้งเตือนล่าสุด")
-    st.markdown("#### 📢 Notification Lastest")
+    st.write("------------------------")
+    st.write("#### 📢 Notification Lastest")
     #st.markdown(f"```\n{notification}\n```")
     st.code(notification, language='text')
-    st.markdown("------------------------")
+    st.write("------------------------")
     # Filter Logdata for relevant entries
     if not df_logdata.empty:
         # Example: Filter Logdata for rows matching a specific column value
