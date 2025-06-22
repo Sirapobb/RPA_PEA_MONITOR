@@ -77,8 +77,8 @@ if not df_notification.empty:
     #display_card("จำนวน Case ที่ Bot ทำงานในวันนี้", total_bot_cases)
     # Display the notification
     st.markdown("------------------------")
-    #st.markdown("##### 📢 Notification Lastest")
-    st.markdown("##### Notification Lastest")
+    st.markdown("##### 📢 Notification Lastest")
+    #st.markdown("##### Notification Lastest")
     #st.markdown(f"```\n{notification}\n```")
     st.code(notification, language='text')
     st.write("------------------------")
