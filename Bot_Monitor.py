@@ -80,7 +80,8 @@ if not df_notification.empty:
     st.markdown("------------------------")
     #st.markdown("##### 📢 การแจ้งเตือนล่าสุด")
     st.markdown("#### 📢 Notification Lastest")
-    st.markdown(f"```\n{notification}\n```")
+    #st.markdown(f"```\n{notification}\n```")
+    st.code(notification, language='text')
     st.markdown("------------------------")
     # Filter Logdata for relevant entries
     if not df_logdata.empty:
